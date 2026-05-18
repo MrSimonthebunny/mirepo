@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GlowIQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#FDFAF6;--bg2:#F5F0E8;--bg3:#EDE6D8;
+  --text:#1C1612;--text2:#5C4F3F;--text3:#9C8B77;
+  --accent:#C4854A;--accent2:#E8A96C;--accent3:#F5D5B0;
+  --green:#4A7C59;--green2:#D4EAD8;
+  --red:#C45A4A;--red2:#F5D4D0;
+  --blue:#4A6FA5;--blue2:#D0DFF5;
+  --card:#FFFFFF;--border:#E8DDD0;
+  --radius:16px;--radius-sm:10px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.app{max-width:820px;margin:0 auto;padding:20px 16px 80px}
+
+/* NAV */
+.nav{display:flex;align-items:center;justify-content:space-between;padding:0 0 24px}
+.logo{font-family:'DM Serif Display',serif;font-size:26px;color:var(--accent);display:flex;align-items:center;gap:8px}
+.logo span{font-size:13px;font-weight:400;color:var(--text3);display:block;line-height:1}
+.nav-tabs{display:flex;gap:4px;background:var(--bg2);padding:4px;border-radius:50px}
+.nav-tab{padding:8px 14px;border-radius:50px;border:none;background:transparent;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text2);font-weight:500;transition:all .2s}
+.nav-tab.active{background:var(--card);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+
+/* SECTIONS */
+.section{display:none;animation:fadeIn .3s ease}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:16px}
+.card-title{font-family:'DM Serif Display',serif;font-size:18px;margin-bottom:4px;color:var(--text)}
+.card-sub{font-size:13px;color:var(--text3);margin-bottom:16px}
+
+/* FORM ELEMENTS */
+label.field-label{display:block;font-size:13px;font-weight:500;color:var(--text2);margin-bottom:6px;margin-top:14px}
+select,input[type=text],input[type=number],textarea{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--bg);outline:none;transition:border .2s}
+select:focus,input:focus,textarea:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:80px}
+
+/* CHIPS */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{padding:7px 14px;border-radius:50px;border:1px solid var(--border);background:var(--bg);font-size:13px;cursor:pointer;color:var(--text2);transition:all .2s;font-weight:500}
+.chip.selected{background:var(--accent);border-color:var(--accent);color:#fff}
+.chip:hover:not(.selected){border-color:var(--accent2);color:var(--accent)}
+
+/* BUTTONS */
+.btn{padding:12px 24px;border-radius:50px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;transition:all .2s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#B5763E}
+.btn-secondary{background:var(--bg2);color:var(--text2);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--bg3)}
+.btn-full{width:100%;margin-top:16px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* ROUTINE */
+.routine-block{background:var(--bg2);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.routine-time{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:12px}
+.routine-step{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.routine-step:last-child{border-bottom:none}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.step-info{flex:1}
+.step-name{font-size:14px;font-weight:600;color:var(--text)}
+.step-desc{font-size:12px;color:var(--text3);margin-top:2px}
+.step-tip{font-size:12px;background:var(--accent3);color:var(--accent);padding:4px 10px;border-radius:6px;margin-top:6px;display:inline-block}
+
+/* SCORE */
+.score-ring{position:relative;display:inline-flex;align-items:center;justify-content:center}
+.score-label{position:absolute;text-align:center}
+.score-num{font-family:'DM Serif Display',serif;font-size:36px;color:var(--text)}
+.score-out{font-size:11px;color:var(--text3)}
+
+/* INGREDIENT RESULTS */
+.ingr-good{background:var(--green2);border-left:3px solid var(--green);padding:8px 12px;border-radius:0 8px 8px 0;margin-bottom:6px}
+.ingr-bad{background:var(--red2);border-left:3px solid var(--red);padding:8px 12px;border-radius:0 8px 8px 0;margin-bottom:6px}
+.ingr-neutral{background:var(--bg2);border-left:3px solid var(--text3);padding:8px 12px;border-radius:0 8px 8px 0;margin-bottom:6px}
+.ingr-name{font-size:13px;font-weight:600}
+.ingr-desc{font-size:12px;color:var(--text2);margin-top:2px}
+
+/* HABITS */
+.habit-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.habit-row:last-child{border-bottom:none}
+.habit-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.habit-text{flex:1}
+.habit-title{font-size:14px;font-weight:600}
+.habit-desc{font-size:12px;color:var(--text3)}
+
+/* PROGRESS TRACKER */
+.tracker-entry{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border)}
+.tracker-date{font-size:11px;color:var(--text3);min-width:60px;padding-top:2px}
+.tracker-content{flex:1}
+.tracker-text{font-size:13px;color:var(--text)}
+.mood-row{display:flex;gap:8px;margin-top:10px}
+.mood-btn{padding:6px 12px;border-radius:50px;border:1px solid var(--border);background:var(--bg);cursor:pointer;font-size:13px;transition:all .2s}
+.mood-btn.sel{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* LOADING */
+.loading{display:flex;align-items:center;gap:10px;padding:20px;color:var(--text3);font-size:14px}
+.dot{width:8px;height:8px;background:var(--accent);border-radius:50%;animation:pulse 1.4s infinite ease-in-out}
+.dot:nth-child(2){animation-delay:.2s}
+.dot:nth-child(3){animation-delay:.4s}
+@keyframes pulse{0%,80%,100%{transform:scale(.6);opacity:.5}40%{transform:scale(1);opacity:1}}
+
+/* BADGE */
+.badge{display:inline-block;padding:3px 10px;border-radius:50px;font-size:11px;font-weight:600}
+.badge-green{background:var(--green2);color:var(--green)}
+.badge-red{background:var(--red2);color:var(--red)}
+.badge-amber{background:#FFF3D0;color:#B8870A}
+.badge-blue{background:var(--blue2);color:var(--blue)}
+
+/* WELCOME */
+.hero{text-align:center;padding:32px 20px 28px}
+.hero-title{font-family:'DM Serif Display',serif;font-size:38px;line-height:1.2;margin-bottom:10px}
+.hero-title em{color:var(--accent);font-style:italic}
+.hero-sub{font-size:16px;color:var(--text2);line-height:1.6;max-width:420px;margin:0 auto 24px}
+
+/* GRID */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:520px){.grid-2{grid-template-columns:1fr}.nav-tabs{gap:2px}.nav-tab{padding:7px 10px;font-size:12px}}
+
+.divider{height:1px;background:var(--border);margin:16px 0}
+.section-header{font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:4px}
+.section-sub{font-size:13px;color:var(--text3);margin-bottom:20px}
+
+.ai-response{background:linear-gradient(135deg,#FFF9F3,#FFF3E6);border:1px solid var(--accent3);border-radius:var(--radius);padding:18px;margin-top:12px}
+.ai-response p{font-size:14px;line-height:1.7;color:var(--text);margin-bottom:8px}
+.ai-response p:last-child{margin-bottom:0}
+.ai-tag{font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+
+.compat-warn{background:#FFF3D0;border:1px solid #F5D060;border-radius:10px;padding:12px 14px;margin-top:8px;font-size:13px;color:#7A5C00}
+
+.progress-bar-wrap{background:var(--bg3);border-radius:50px;height:8px;overflow:hidden;margin:6px 0}
+.progress-bar{height:100%;border-radius:50px;background:var(--accent);transition:width .6s ease}
+
+.empty-state{text-align:center;padding:40px 20px;color:var(--text3)}
+.empty-state .es-icon{font-size:40px;margin-bottom:10px}
+.empty-state p{font-size:14px}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="logo">
+    <div>
+      GlowIQ
+      <span>tu laboratorio de piel</span>
+    </div>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showSection('perfil')">Perfil</button>
+    <button class="nav-tab" onclick="showSection('rutina')">Rutina</button>
+    <button class="nav-tab" onclick="showSection('analizar')">Analizar</button>
+    <button class="nav-tab" onclick="showSection('seguimiento')">Progreso</button>
+    <button class="nav-tab" onclick="showSection('habitos')">Hábitos</button>
+  </div>
+</nav>
+
+<!-- ===================== PERFIL ===================== -->
+<section id="perfil" class="section active">
+  <div class="hero">
+    <div class="hero-title">Tu piel,<br><em>entendida de verdad</em></div>
+    <div class="hero-sub">Completá tu perfil para recibir una rutina personalizada y análisis de ingredientes adaptados a vos.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Piel &amp; características</div>
+    <div class="card-sub">Contanos sobre tu tipo de piel para personalizar todo</div>
+
+    <label class="field-label">Tipo de piel</label>
+    <div class="chips" id="chips-piel">
+      <div class="chip" onclick="toggleChip(this,'piel','seca')">Seca</div>
+      <div class="chip" onclick="toggleChip(this,'piel','grasa')">Grasa</div>
+      <div class="chip" onclick="toggleChip(this,'piel','mixta')">Mixta</div>
+      <div class="chip" onclick="toggleChip(this,'piel','sensible')">Sensible</div>
+      <div class="chip" onclick="toggleChip(this,'piel','normal')">Normal</div>
+    </div>
+
+    <label class="field-label">Problemas principales (podés elegir varios)</label>
+    <div class="chips" id="chips-problemas">
+      <div class="chip" onclick="toggleChipMulti(this,'problemas','acne')">Acné</div>
+      <div class="chip" onclick="toggleChipMulti(this,'problemas','manchas')">Manchas</div>
+      <div class="chip" onclick="toggleChipMulti(this,'problemas','irritacion')">Irritación</div>
+      <div class="chip" onclick="toggleChipMulti(this,'problemas','poros')">Poros abiertos</div>
+      <div class="chip" onclick="toggleChipMulti(this,'problemas','arrugas')">Líneas finas</div>
+      <div class="chip" onclick="toggleChipMulti(this,'problemas','opacidad')">Piel opaca</div>
+      <div class="chip" onclick="toggleChipMulti(this,'problemas','rojeces')">Rojeces</div>
+    </div>
+
+    <label class="field-label">Tono de piel</label>
+    <div class="chips" id="chips-tono">
+      <div class="chip" onclick="toggleChip(this,'tono','muy claro')">Muy claro</div>
+      <div class="chip" onclick="toggleChip(this,'tono','claro')">Claro</div>
+      <div class="chip" onclick="toggleChip(this,'tono','medio')">Medio</div>
+      <div class="chip" onclick="toggleChip(this,'tono','oscuro')">Oscuro</div>
+      <div class="chip" onclick="toggleChip(this,'tono','muy oscuro')">Muy oscuro</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Datos personales</div>
+    <div class="card-sub">Para adaptar las recomendaciones según tu etapa de vida</div>
+    <div class="grid-2">
+      <div>
+        <label class="field-label">Edad</label>
+        <input type="number" id="edad" placeholder="ej: 27" min="10" max="99">
+      </div>
+      <div>
+        <label class="field-label">Sexo (opcional)</label>
+        <select id="sexo">
+          <option value="">Prefiero no decir</option>
+          <option value="femenino">Femenino</option>
+          <option value="masculino">Masculino</option>
+          <option value="no binario">No binario</option>
+        </select>
+      </div>
+    </div>
+    <label class="field-label">Preferencias de productos</label>
+    <div class="chips" id="chips-pref">
+      <div class="chip" onclick="toggleChipMulti(this,'preferencias','coreano')">Skincare coreano</div>
+      <div class="chip" onclick="toggleChipMulti(this,'preferencias','natural')">Naturales / orgánicos</div>
+      <div class="chip" onclick="toggleChipMulti(this,'preferencias','vegan')">Veganos</div>
+      <div class="chip" onclick="toggleChipMulti(this,'preferencias','economico')">Económicos</div>
+      <div class="chip" onclick="toggleChipMulti(this,'preferencias','sin fragancia')">Sin fragancia</div>
+      <div class="chip" onclick="toggleChipMulti(this,'preferencias','farmacia')">De farmacia</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Cabello</div>
+    <div class="card-sub">Incluimos recomendaciones capilares en tu rutina</div>
+    <label class="field-label">Tipo de cabello</label>
+    <div class="chips" id="chips-pelo">
+      <div class="chip" onclick="toggleChip(this,'pelo','lacio')">Lacio</div>
+      <div class="chip" onclick="toggleChip(this,'pelo','ondulado')">Ondulado</div>
+      <div class="chip" onclick="toggleChip(this,'pelo','rizado')">Rizado</div>
+      <div class="chip" onclick="toggleChip(this,'pelo','muy rizado')">Muy rizado</div>
+    </div>
+    <label class="field-label">Preocupaciones capilares</label>
+    <div class="chips" id="chips-pelo-prob">
+      <div class="chip" onclick="toggleChipMulti(this,'peloproblemas','caspa')">Caspa</div>
+      <div class="chip" onclick="toggleChipMulti(this,'peloproblemas','caida')">Caída / calvicie</div>
+      <div class="chip" onclick="toggleChipMulti(this,'peloproblemas','grasoso')">Cuero cabelludo graso</div>
+      <div class="chip" onclick="toggleChipMulti(this,'peloproblemas','seco')">Puntas secas</div>
+      <div class="chip" onclick="toggleChipMulti(this,'peloproblemas','frizz')">Frizz</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Horarios</div>
+    <div class="card-sub">Así adaptamos la rutina a tu día a día</div>
+    <div class="grid-2">
+      <div>
+        <label class="field-label">Me levanto a las</label>
+        <input type="text" id="hora-levanta" placeholder="ej: 7:00 am">
+      </div>
+      <div>
+        <label class="field-label">Me acuesto a las</label>
+        <input type="text" id="hora-duerme" placeholder="ej: 11:30 pm">
+      </div>
+    </div>
+  </div>
+
+  <button class="btn btn-primary btn-full" onclick="guardarPerfil()">Guardar perfil y generar mi rutina →</button>
+</section>
+
+<!-- ===================== RUTINA ===================== -->
+<section id="rutina" class="section">
+  <div class="section-header">Tu rutina personalizada</div>
+  <div class="section-sub" id="rutina-sub">Basada en tu perfil de piel</div>
+
+  <div id="rutina-content">
+    <div class="empty-state">
+      <div class="es-icon">✨</div>
+      <p>Completá tu perfil para ver tu rutina personalizada</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== ANALIZAR ===================== -->
+<section id="analizar" class="section">
+  <div class="section-header">Analizador de ingredientes</div>
+  <div class="section-sub">Pegá la lista de ingredientes de un producto y te decimos si es ideal para tu piel</div>
+
+  <div class="card">
+    <label class="field-label">Nombre del producto (opcional)</label>
+    <input type="text" id="prod-nombre" placeholder="ej: CeraVe Moisturizing Cream">
+    <label class="field-label">Lista de ingredientes (INCI)</label>
+    <textarea id="prod-ingr" placeholder="Pegá aquí los ingredientes del producto, ej: Aqua, Glycerin, Niacinamide, Alcohol Denat, Fragrance, Retinol..."></textarea>
+    <button class="btn btn-primary btn-full" onclick="analizarProducto()">Analizar ingredientes →</button>
+  </div>
+
+  <div id="analisis-resultado"></div>
+
+  <div class="card" style="margin-top:4px">
+    <div class="card-title" style="font-size:15px">⚗️ Compatibilidades entre activos</div>
+    <div class="card-sub">Referencia rápida de qué NO mezclar</div>
+    <div class="compat-warn">⚠️ <strong>Retinol + AHA/BHA</strong> — Demasiado irritante juntos. Usá uno de mañana y el otro de noche, o en días alternos.</div>
+    <div class="compat-warn">⚠️ <strong>Vitamina C + Niacinamida</strong> — Puede reducir la efectividad de la Vit C. Esperá al menos 30 min entre aplicaciones.</div>
+    <div class="compat-warn">⚠️ <strong>Retinol + Vitamina C</strong> — Ambos se oxidan juntos. Vit C de día (con SPF), Retinol de noche.</div>
+    <div class="compat-warn">⚠️ <strong>Peróxido de benzoilo + Retinol</strong> — Se inactivan mutuamente. Usarlos separados por turnos.</div>
+    <div style="background:var(--green2);border:1px solid #A8D8B0;border-radius:10px;padding:12px 14px;margin-top:8px;font-size:13px;color:#2D6B3E">✅ <strong>Niacinamida + Zinc</strong> — Excelente combo para poros y exceso de sebo.</div>
+    <div style="background:var(--green2);border:1px solid #A8D8B0;border-radius:10px;padding:12px 14px;margin-top:8px;font-size:13px;color:#2D6B3E">✅ <strong>Retinol + Péptidos</strong> — Se potencian mutuamente para anti-envejecimiento.</div>
+  </div>
+</section>
+
+<!-- ===================== SEGUIMIENTO ===================== -->
+<section id="seguimiento" class="section">
+  <div class="section-header">Seguimiento de resultados</div>
+  <div class="section-sub">Registrá cómo evoluciona tu piel. Los patrones se vuelven visibles con el tiempo.</div>
+
+  <div class="card">
+    <div class="card-title" style="font-size:15px">Registrar hoy</div>
+    <label class="field-label">¿Cómo está tu piel hoy?</label>
+    <div class="mood-row" id="mood-piel">
+      <button class="mood-btn" onclick="selMood(this,'piel','muy mal')">😞 Muy mal</button>
+      <button class="mood-btn" onclick="selMood(this,'piel','regular')">😐 Regular</button>
+      <button class="mood-btn" onclick="selMood(this,'piel','bien')">🙂 Bien</button>
+      <button class="mood-btn" onclick="selMood(this,'piel','muy bien')">😊 Muy bien</button>
+    </div>
+    <label class="field-label">¿Seguiste tu rutina?</label>
+    <div class="mood-row" id="mood-rutina">
+      <button class="mood-btn" onclick="selMood(this,'rutina','no')">❌ No</button>
+      <button class="mood-btn" onclick="selMood(this,'rutina','parcial')">◑ Parcial</button>
+      <button class="mood-btn" onclick="selMood(this,'rutina','si')">✅ Completa</button>
+    </div>
+    <label class="field-label">Notas (brotes, cambios, nuevos productos...)</label>
+    <textarea id="notas-seguimiento" placeholder="ej: Noté menos brillo durante el día. Empecé a usar el sérum de noche."></textarea>
+    <label class="field-label">Síntomas activos hoy</label>
+    <div class="chips" id="chips-sintomas">
+      <div class="chip" onclick="toggleChipMulti(this,'sintomas','acne')">Acné activo</div>
+      <div class="chip" onclick="toggleChipMulti(this,'sintomas','rojez')">Rojez</div>
+      <div class="chip" onclick="toggleChipMulti(this,'sintomas','sequedad')">Sequedad</div>
+      <div class="chip" onclick="toggleChipMulti(this,'sintomas','brillo')">Brillo excesivo</div>
+      <div class="chip" onclick="toggleChipMulti(this,'sintomas','ninguno')">Sin síntomas</div>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="guardarEntrada()">Guardar entrada de hoy</button>
+  </div>
+
+  <div id="historial-entradas"></div>
+
+  <div class="card" id="card-tendencias" style="display:none">
+    <div class="card-title" style="font-size:15px">📊 Tendencias detectadas</div>
+    <div id="tendencias-content"></div>
+  </div>
+</section>
+
+<!-- ===================== HABITOS ===================== -->
+<section id="habitos" class="section">
+  <div class="section-header">Hábitos &amp; lifestyle</div>
+  <div class="section-sub">Tu piel refleja cómo vivís. Pequeños cambios, resultados reales.</div>
+
+  <div class="card">
+    <div class="card-title" style="font-size:15px">💧 Hidratación</div>
+    <div class="habit-row">
+      <div class="habit-icon" style="background:#E8F4FD">💧</div>
+      <div class="habit-text">
+        <div class="habit-title">Tomá 2L de agua por día</div>
+        <div class="habit-desc">La hidratación interna mejora la elasticidad y el brillo de la piel.</div>
+      </div>
+      <input type="range" min="0" max="8" value="4" style="width:80px" oninput="updHabito('agua',this.value,this.parentElement.querySelector('.hab-val'))" title="vasos de agua"> <span class="hab-val" style="font-size:13px;font-weight:600;color:var(--accent);min-width:24px">4</span>
+    </div>
+    <div class="habit-row">
+      <div class="habit-icon" style="background:#F0F8F0">🥦</div>
+      <div class="habit-text">
+        <div class="habit-title">Antioxidantes en la dieta</div>
+        <div class="habit-desc">Berries, té verde, espinaca — combaten el daño oxidativo en la piel.</div>
+      </div>
+    </div>
+    <div class="habit-row">
+      <div class="habit-icon" style="background:#FFF8E8">☀️</div>
+      <div class="habit-text">
+        <div class="habit-title">SPF todos los días</div>
+        <div class="habit-desc">El protector solar es el anti-edad más efectivo que existe.</div>
+      </div>
+      <span class="badge badge-red">Clave</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="font-size:15px">😴 Sueño &amp; recuperación</div>
+    <div class="habit-row">
+      <div class="habit-icon" style="background:#F5E8FF">🛏️</div>
+      <div class="habit-text">
+        <div class="habit-title">Cambiar la funda de almohada</div>
+        <div class="habit-desc">Cada 2–3 días. Las bacterias acumuladas generan acné. Una funda de seda reduce la fricción y retiene menos bacterias.</div>
+      </div>
+      <span class="badge badge-amber">Pro tip</span>
+    </div>
+    <div class="habit-row">
+      <div class="habit-icon" style="background:#E8F5E8">🌙</div>
+      <div class="habit-text">
+        <div class="habit-title">7–9 horas de sueño</div>
+        <div class="habit-desc">La piel se regenera principalmente entre las 10pm y las 2am. Respetar esa ventana importa.</div>
+      </div>
+    </div>
+    <div class="habit-row">
+      <div class="habit-icon" style="background:#FFF0E8">📱</div>
+      <div class="habit-text">
+        <div class="habit-title">Pantallas 1h antes de dormir</div>
+        <div class="habit-desc">La luz azul interfiere con la melatonina y la calidad del sueño reparador.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="font-size:15px">🦷 Salud dental (bonus)</div>
+    <div class="habit-row">
+      <div class="habit-icon" style="background:#E8F0FF">🦷</div>
+      <div class="habit-text">
+        <div class="habit-title">Cepillado con pasta con flúor</div>
+        <div class="habit-desc">El flúor sigue siendo el ingrediente activo más validado para prevenir caries.</div>
+      </div>
+    </div>
+    <div class="habit-row">
+      <div class="habit-icon" style="background:#F0FFF0">🧵</div>
+      <div class="habit-text">
+        <div class="habit-title">Hilo dental o interdentales</div>
+        <div class="habit-desc">Elimina placa donde el cepillo no llega. La salud gingival impacta la inflamación sistémica.</div>
+      </div>
+      <span class="badge badge-blue">Sub-estimado</span>
+    </div>
+    <div class="habit-row">
+      <div class="habit-icon" style="background:#FFF8E8">⚗️</div>
+      <div class="habit-text">
+        <div class="habit-title">Ingredientes a buscar en pasta</div>
+        <div class="habit-desc">Hidroxiapatita (remineralización), fluoruro de sodio, nitrato de potasio (dientes sensibles).</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="card-habitos-ia" style="display:none">
+    <div class="card-title" style="font-size:15px">🧠 Recomendaciones personalizadas</div>
+    <div id="habitos-ia-content"></div>
+  </div>
+  <button class="btn btn-secondary btn-full" onclick="generarHabitosIA()" id="btn-habitos-ia">Generar recomendaciones personalizadas con IA →</button>
+</section>
+
+</div>
+
+<script>
+const state = {
+  piel:null, problemas:[], tono:null, edad:null, sexo:null,
+  preferencias:[], pelo:null, peloproblemas:[],
+  horaLevanta:null, horaDuerme:null,
+  agua:4, sintomas:[], moodPiel:null, moodRutina:null,
+  historial: JSON.parse(localStorage.getItem('glowiq_historial')||'[]')
+};
+
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if(id==='rutina' && state.piel) renderRutina();
+  if(id==='seguimiento') renderHistorial();
+  if(id==='habitos' && state.piel) generarHabitosPersonalizados();
+}
+
+function toggleChip(el, key, val){
+  document.querySelectorAll('#chips-'+key+' .chip').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  state[key]=val;
+}
+function toggleChipMulti(el, key, val){
+  el.classList.toggle('selected');
+  if(!state[key]) state[key]=[];
+  if(el.classList.contains('selected')){
+    if(!state[key].includes(val)) state[key].push(val);
+  } else {
+    state[key]=state[key].filter(v=>v!==val);
+  }
+}
+
+function guardarPerfil(){
+  state.edad = document.getElementById('edad').value;
+  state.sexo = document.getElementById('sexo').value;
+  state.horaLevanta = document.getElementById('hora-levanta').value;
+  state.horaDuerme = document.getElementById('hora-duerme').value;
+  if(!state.piel){ alert('Seleccioná tu tipo de piel para continuar.'); return; }
+  document.querySelectorAll('.nav-tab')[1].click();
+  renderRutina();
+}
+
+function renderRutina(){
+  const p = state;
+  const sub = document.getElementById('rutina-sub');
+  if(p.piel) sub.textContent = `Para piel ${p.piel}${p.edad?' · '+p.edad+' años':''}${p.problemas.length?' · '+p.problemas.join(', '):''}`;
+
+  const morning = buildRoutine('mañana');
+  const night = buildRoutine('noche');
+
+  let score = calcScore();
+  let scoreColor = score>=70?'#4A7C59':score>=45?'#B8870A':'#C45A4A';
+
+  document.getElementById('rutina-content').innerHTML = `
+    <div class="card" style="text-align:center;padding:24px">
+      <div class="ai-tag">Puntaje de rutina</div>
+      <svg width="120" height="120" viewBox="0 0 120 120">
+        <circle cx="60" cy="60" r="50" fill="none" stroke="#EDE6D8" stroke-width="10"/>
+        <circle cx="60" cy="60" r="50" fill="none" stroke="${scoreColor}" stroke-width="10"
+          stroke-dasharray="${2*Math.PI*50}" stroke-dashoffset="${2*Math.PI*50*(1-score/100)}"
+          stroke-linecap="round" transform="rotate(-90 60 60)"/>
+        <text x="60" y="55" text-anchor="middle" font-family="DM Serif Display,serif" font-size="30" fill="${scoreColor}">${score}</text>
+        <text x="60" y="72" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#9C8B77">/100</text>
+      </svg>
+      <div style="font-size:13px;color:var(--text2);margin-top:8px">${scoreMsg(score)}</div>
+    </div>
+    <div class="routine-block">
+      <div class="routine-time">☀️ Rutina de mañana${p.horaLevanta?' · '+p.horaLevanta:''}</div>
+      ${morning.map((s,i)=>`
+        <div class="routine-step">
+          <div class="step-num">${i+1}</div>
+          <div class="step-info">
+            <div class="step-name">${s.name}</div>
+            <div class="step-desc">${s.desc}</div>
+            ${s.tip?`<div class="step-tip">💡 ${s.tip}</div>`:''}
+          </div>
+        </div>`).join('')}
+    </div>
+    <div class="routine-block">
+      <div class="routine-time">🌙 Rutina de noche${p.horaDuerme?' · '+p.horaDuerme:''}</div>
+      ${night.map((s,i)=>`
+        <div class="routine-step">
+          <div class="step-num">${i+1}</div>
+          <div class="step-info">
+            <div class="step-name">${s.name}</div>
+            <div class="step-desc">${s.desc}</div>
+            ${s.tip?`<div class="step-tip">💡 ${s.tip}</div>`:''}
+          </div>
+        </div>`).join('')}
+    </div>
+    ${p.peloproblemas.length?`
+    <div class="routine-block">
+      <div class="routine-time">💇 Cuidado capilar · semanal</div>
+      ${buildPeloRoutine().map((s,i)=>`
+        <div class="routine-step">
+          <div class="step-num">${i+1}</div>
+          <div class="step-info">
+            <div class="step-name">${s.name}</div>
+            <div class="step-desc">${s.desc}</div>
+            ${s.tip?`<div class="step-tip">💡 ${s.tip}</div>`:''}
+          </div>
+        </div>`).join('')}
+    </div>`:''}
+  `;
+}
+
+function buildRoutine(momento){
+  const p = state;
+  const steps = [];
+  if(momento==='mañana'){
+    steps.push({name:'Limpieza suave',desc:p.piel==='grasa'?'Limpiador con ácido salicílico al 0.5–1%':p.piel==='seca'?'Limpiador cremoso sin sulfatos':p.piel==='sensible'?'Limpiador micelar sin fragancia':'Limpiador en gel con pH balanceado',tip:p.piel==='seca'?'Agua tibia, nunca caliente. No frotar, dar suaves toquecitos':null});
+    if(p.problemas.includes('manchas')||p.problemas.includes('opacidad')) steps.push({name:'Sérum de Vitamina C',desc:'Aplica 3–5 gotas antes de la hidratación. Activa con el SPF para protección antioxidante.',tip:'Esperá 30 segundos para que absorba antes del siguiente paso'});
+    if(p.problemas.includes('acne')||p.piel==='grasa') steps.push({name:'Tónico con Niacinamida',desc:'Equilibra el sebo y reduce la apariencia de poros. Formulaciones al 5–10%.',tip:null});
+    steps.push({name:'Hidratante',desc:p.piel==='grasa'?'Gel hidratante oil-free con ácido hialurónico':p.piel==='seca'?'Crema rica con ceramidas y glicerina':p.piel==='sensible'?'Fórmula mínima, sin fragancias ni alcohol':'Loción ligera con humectantes',tip:null});
+    steps.push({name:'Protector solar SPF 50+',desc:'El paso más importante de la mañana. Reaplicar cada 2h si hay exposición solar.',tip:'No saltearlo aunque esté nublado. El 80% de los UVA pasa por las nubes.'});
+  } else {
+    steps.push({name:'Doble limpieza',desc:'Primero limpiador oleoso/micelar (elimina protector y maquillaje), luego limpiador acuoso.',tip:p.piel==='sensible'?'Si tu piel es sensible, el segundo limpiador puede ser muy suave o saltearlo':'null'});
+    if(p.problemas.includes('poros')||p.piel==='grasa') steps.push({name:'Exfoliación química (2–3x/semana)',desc:p.piel==='sensible'?'PHA al 3–5% (más suave que AHA/BHA)':'AHA como ácido glicólico o láctico al 5–10% para renovar la piel.',tip:'No usar el mismo día que retinol'});
+    if(p.problemas.includes('acne')) steps.push({name:'Tratamiento localizado',desc:'Peróxido de benzoilo al 2.5% sobre los granos activos. Solo en zona afectada.',tip:null});
+    if(parseInt(p.edad)>25 || p.problemas.includes('arrugas')) steps.push({name:'Retinol o bakuchiol',desc:parseInt(p.edad)>30?'Retinol al 0.025–0.05% para empezar. Aumentar gradualmente según tolerancia.':'Bakuchiol (alternativa vegana al retinol). Más suave, ideal para empezar.',tip:'Comenzar 1–2 noches por semana. Siempre de noche, nunca con sol.'});
+    steps.push({name:'Hidratante nutritivo de noche',desc:p.piel==='seca'?'Crema densa con ceramidas, escualano o manteca de karité':'Crema hidratante reparadora más rica que la de día.',tip:'La piel se regenera de noche: un buen hidratante nocturno hace mucho'});
+    if(p.problemas.includes('manchas')) steps.push({name:'Sérum aclaran./anti-manchas (opcional)',desc:'Niacinamida al 10%, ácido kójico, arbutina o alfa-arbutina. Usá solo uno a la vez.',tip:'La constancia importa más que la concentración'});
+  }
+  return steps;
+}
+
+function buildPeloRoutine(){
+  const p = state;
+  const steps = [];
+  if(p.peloproblemas.includes('caspa')) steps.push({name:'Shampoo anticaspa',desc:'Con zinc piritionato o ketoconazol. Usar 2x/semana, dejar actuar 2–3 min antes de enjuagar.',tip:'No confundir caspa (fúngica) con piel seca del cuero: tratamientos distintos'});
+  if(p.peloproblemas.includes('caida')) steps.push({name:'Shampoo densificante + Minoxidil (opcional)',desc:'Shampoos con biotina, cafeína o niacinamida. Minoxidil 5% para uso tópico (consultar médico).',tip:'El masaje capilar diario de 5 min mejora la circulación y el crecimiento'});
+  if(p.peloproblemas.includes('grasoso')) steps.push({name:'Shampoo para cuero graso',desc:'Con ácido salicílico o zinc. Lavado cada 2 días. Aplicar acondicionador solo en puntas.',tip:'El cuero cabelludo graso puede estar sobre-activo por lavado excesivo'});
+  if(p.peloproblemas.includes('seco')||p.peloproblemas.includes('frizz')) steps.push({name:'Mascarilla hidratante',desc:'1x semana. Con keratina, aceite de argán o proteína de seda. Dejar 10–20 min.',tip:null});
+  steps.push({name:'Protección térmica',desc:'Antes de secador o plancha, siempre protector térmico. Reduce el daño por calor hasta un 80%.',tip:null});
+  return steps;
+}
+
+function calcScore(){
+  let s = 40;
+  if(state.piel) s+=15;
+  if(state.problemas.length) s+=10;
+  if(state.edad) s+=10;
+  if(state.preferencias.length) s+=5;
+  if(state.horaLevanta) s+=10;
+  if(state.horaDuerme) s+=10;
+  return Math.min(s,96);
+}
+function scoreMsg(s){
+  if(s>=80) return 'Tu rutina está muy bien perfilada. Seguí así y la constancia hará el trabajo.';
+  if(s>=60) return 'Buena base. Agregar más detalles de tu perfil puede mejorar las recomendaciones.';
+  return 'Completá más datos de tu perfil para afinar las recomendaciones.';
+}
+
+// ===================== ANALIZADOR =====================
+const INGREDIENTES_DB = {
+  buenos:{
+    'niacinamide':['Niacinamida','Atenúa manchas, reduce sebo, fortalece la barrera. Ideal para casi todo tipo de piel.','green'],
+    'niacinamida':['Niacinamida','Atenúa manchas, reduce sebo, fortalece la barrera. Ideal para casi todo tipo de piel.','green'],
+    'hyaluronic acid':['Ácido hialurónico','Hidratación profunda sin obstruir poros. Apta para todos los tipos de piel.','green'],
+    'glycerin':['Glicerina','Humectante suave y efectivo. Atrae agua del ambiente a la piel.','green'],
+    'ceramide':['Ceramidas','Reparan y fortalecen la barrera cutánea. Clave para piel seca o sensible.','green'],
+    'retinol':['Retinol','Activo anti-edad y anti-acné comprobado. Usar de noche, iniciar gradualmente.','green'],
+    'vitamin c':['Vitamina C','Antioxidante y anti-manchas. Más efectiva al 10–20% en formulaciones estables.','green'],
+    'ascorbic acid':['Ácido ascórbico (Vit C)','Forma pura y potente de vitamina C. Inestable: revisar envase opaco.','green'],
+    'salicylic acid':['Ácido salicílico','Exfoliante BHA, penetra el poro. Ideal para acné y piel grasa.','green'],
+    'glycolic acid':['Ácido glicólico','AHA exfoliante. Renueva la piel y atenúa manchas. No usar con retinol.','green'],
+    'lactic acid':['Ácido láctico','AHA más suave que el glicólico. Bueno para piel sensible y deshidratada.','green'],
+    'squalane':['Escualano','Aceite ligero, no comedogénico. Hidrata y sella sin obstruir.','green'],
+    'centella asiatica':['Centella asiática','Calmante, cicatrizante y antioxidante. Perfecto para piel sensible o con rosácea.','green'],
+    'panthenol':['Pantenol (Pro-Vit B5)','Hidratante y calmante. Ayuda a reparar la barrera cutánea.','green'],
+    'zinc oxide':['Óxido de zinc','Activo SPF físico y anti-inflamatorio. Apto para piel sensible y acneica.','green'],
+    'peptides':['Péptidos','Señales celulares para estimular el colágeno. Uso anti-edad.','green'],
+    'bakuchiol':['Bakuchiol','Alternativa al retinol de origen vegetal. Más suave, apta para embarazo.','green'],
+    'tranexamic acid':['Ácido tranexámico','Anti-manchas potente. Bien tolerado incluso en pieles sensibles.','green'],
+    'azelaic acid':['Ácido azelaico','Anti-acné, anti-manchas y anti-rosacea. Muy versátil y bien tolerado.','green'],
+    'kojic acid':['Ácido kójico','Inhibe la melanina, efectivo contra manchas y tono desigual.','green'],
+    'arbutin':['Arbutina','Suave y efectivo para atenuar manchas. Precursor del hidroquinon.','green'],
+    'tocopherol':['Tocoferol (Vit E)','Antioxidante. Suele estar combinado con Vit C para estabilizarla.','green'],
+    'aqua':['Agua','Base de la fórmula. No tiene efecto activo per se.','neutral'],
+    'aloe vera':['Aloe vera','Calmante e hidratante. Ideal para pieles sensibles o post-sol.','green'],
+    'green tea extract':['Extracto de té verde','Antioxidante y antiinflamatorio. Protege contra el daño ambiental.','green'],
+  },
+  malos:{
+    'alcohol denat':['Alcohol desnaturalizado','Puede irritar y resecar la piel, especialmente la sensible o seca. Buscar en las primeras posiciones del INCI.','red'],
+    'sd alcohol':['Alcohol SD','Similar al alcohol denat. Irrita y rompe la barrera lipídica.','red'],
+    'fragrance':['Fragancia sintética','La causa #1 de alergias de contacto en cosméticos. Evitar en piel sensible.','red'],
+    'parfum':['Perfume/Fragrance','Mezcla de químicos aromáticos. Potencial alérgeno. Leer siempre el INCI.','red'],
+    'sodium lauryl sulfate':['SLS (Sodium Lauryl Sulfate)','Surfactante agresivo. Elimina demasiado sebo y daña la barrera cutánea.','red'],
+    'formaldehyde':['Formaldehído','Conservante tóxico y alérgeno potente. Evitar siempre.','red'],
+    'parabens':['Parabenos','Conservantes cuestionados por posible actividad hormonal. Evitar en personas sensibles.','red'],
+    'methylparaben':['Metilparabeno','Tipo de parabeno, conservante. Ver más arriba.','red'],
+    'propylparaben':['Propilparabeno','Parabeno con mayor actividad estrogénica que el metilparabeno.','red'],
+    'oxybenzone':['Oxibenzona','Filtro UV químico. Alergénico y con posible disrupción hormonal.','red'],
+    'mineral oil':['Aceite mineral','Oclusivo. Puede obstruir poros en pieles propensas al acné.','red'],
+    'isopropyl myristate':['Isopropil miristato','Alta comedogenicidad. Evitar en piel acneica o con tendencia a puntos negros.','red'],
+    'denatured alcohol':['Alcohol desnaturalizado','Ver Alcohol Denat.','red'],
+  },
+  neutros:{
+    'dimethicone':['Dimeticona','Siliconas. Textura suave, oclusiva. No comedogénica. Cuestionada en rutinas "clean beauty".','neutral'],
+    'phenoxyethanol':['Fenoxietanol','Conservante ampliamente usado. Considerado seguro a concentraciones <1%.','neutral'],
+    'sodium hyaluronate':['Hialuronato de sodio','Forma del ácido hialurónico. Muy efectiva.','green'],
+    'carbomer':['Carbomer','Agente gelificante. Sin actividad activa, texturante.','neutral'],
+    'cetyl alcohol':['Cetil alcohol','Alcohol graso (NO irritante). Emoliente y estabilizador de fórmulas.','neutral'],
+    'stearic acid':['Ácido esteárico','Ácido graso. Emoliente. Sin actividad activa.','neutral'],
+    'polysorbate':['Polisorbato','Emulsionante. Sin actividad activa directa.','neutral'],
+    'disodium edta':['Disodium EDTA','Quelante, estabiliza la fórmula. Considerado seguro.','neutral'],
+    'propylene glycol':['Propilenglicol','Humectante. Puede irritar a concentraciones altas, pero suele ser seguro.','neutral'],
+    'butylene glycol':['Butilenglicol','Humectante similar al propilenglicol. Generalmente bien tolerado.','neutral'],
+    'xanthan gum':['Goma xantana','Espesante natural. Sin actividad activa.','neutral'],
+    'citric acid':['Ácido cítrico','Ajustador de pH. Puede ser levemente exfoliante a altas concentraciones.','neutral'],
+  }
+};
+
+async function analizarProducto(){
+  const nombre = document.getElementById('prod-nombre').value.trim();
+  const ingrs = document.getElementById('prod-ingr').value.trim();
+  if(!ingrs){ alert('Ingresá la lista de ingredientes.'); return; }
+
+  const div = document.getElementById('analisis-resultado');
+  div.innerHTML = `<div class="card"><div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span>Analizando con IA...</span></div></div>`;
+
+  const localAnalysis = analyzeLocally(ingrs);
+
+  try{
+    const perfil = `Tipo de piel: ${state.piel||'no especificado'}, Problemas: ${state.problemas.join(', ')||'ninguno'}, Preferencias: ${state.preferencias.join(', ')||'ninguna'}`;
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:`Sos un experto en cosmética y dermatología que analiza ingredientes de productos. Responde siempre en español rioplatense (Argentina). Da un análisis claro, honesto y útil. No seas alarmista pero sé específico. Cuando des un puntaje, explicá brevemente el porqué sin ser determinante.`,
+        messages:[{role:'user',content:`Analiza estos ingredientes para una persona con el siguiente perfil: ${perfil}.
+
+Producto: ${nombre||'sin nombre'}
+Ingredientes: ${ingrs}
+
+Dame:
+1. Un puntaje de compatibilidad del 1 al 100 para este perfil (con breve justificación, sin ser absoluto)
+2. Los 3 ingredientes más destacados (buenos o problemáticos) con explicación breve
+3. Una recomendación de uso (cuando usarlo, cómo, precauciones)
+4. Una conclusión de 2 líneas máximo
+
+Formato: párrafos cortos, lenguaje claro, no uses markdown con asteriscos, solo texto plano.`}]
+      })
+    });
+    const data = await resp.json();
+    const aiText = data.content?.map(c=>c.text||'').join('') || '';
+
+    div.innerHTML = renderAnalisisCard(localAnalysis, aiText, nombre);
+  } catch(e){
+    div.innerHTML = renderAnalisisCard(localAnalysis, null, nombre);
+  }
+}
+
+function analyzeLocally(ingrs){
+  const lower = ingrs.toLowerCase();
+  const good=[],bad=[],neutral_=[],unknown=[];
+  const allKeys = {...INGREDIENTES_DB.buenos,...INGREDIENTES_DB.malos,...INGREDIENTES_DB.neutros};
+  const found=new Set();
+  for(const [key,val] of Object.entries(allKeys)){
+    if(lower.includes(key)&&!found.has(key)){
+      found.add(key);
+      if(val[2]==='green') good.push(val);
+      else if(val[2]==='red') bad.push(val);
+      else neutral_.push(val);
+    }
+  }
+  return {good,bad,neutral:neutral_};
+}
+
+function renderAnalisisCard(local, aiText, nombre){
+  let html = `<div class="card"><div class="card-title">${nombre||'Análisis de producto'}</div>`;
+  if(aiText){
+    html+=`<div class="ai-response"><div class="ai-tag">🧠 Análisis con IA</div>${aiText.split('\n').filter(l=>l.trim()).map(l=>`<p>${l}</p>`).join('')}</div>`;
+  }
+  if(local.good.length||local.bad.length||local.neutral.length){
+    html+=`<div style="margin-top:16px"><div class="ai-tag" style="margin-bottom:12px">Ingredientes identificados</div>`;
+    local.bad.forEach(i=>html+=`<div class="ingr-bad"><div class="ingr-name">⚠️ ${i[0]}</div><div class="ingr-desc">${i[1]}</div></div>`);
+    local.good.forEach(i=>html+=`<div class="ingr-good"><div class="ingr-name">✅ ${i[0]}</div><div class="ingr-desc">${i[1]}</div></div>`);
+    local.neutral.forEach(i=>html+=`<div class="ingr-neutral"><div class="ingr-name">${i[0]}</div><div class="ingr-desc">${i[1]}</div></div>`);
+    html+=`</div>`;
+  }
+  html+=`</div>`;
+  return html;
+}
+
+// ===================== SEGUIMIENTO =====================
+function selMood(el, group, val){
+  el.closest('.mood-row').querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  state['mood'+group.charAt(0).toUpperCase()+group.slice(1)]=val;
+}
+function updHabito(key,val,span){
+  state[key]=val;
+  if(span) span.textContent=val;
+}
+
+function guardarEntrada(){
+  const notas = document.getElementById('notas-seguimiento').value;
+  const entry = {
+    fecha: new Date().toLocaleDateString('es-AR'),
+    piel: state.moodPiel,
+    rutina: state.moodRutina,
+    sintomas: [...(state.sintomas||[])],
+    notas
+  };
+  state.historial.unshift(entry);
+  localStorage.setItem('glowiq_historial', JSON.stringify(state.historial));
+  document.getElementById('notas-seguimiento').value='';
+  renderHistorial();
+  mostrarTendencias();
+}
+
+function renderHistorial(){
+  const cont = document.getElementById('historial-entradas');
+  if(!state.historial.length){
+    cont.innerHTML=`<div class="empty-state"><div class="es-icon">📋</div><p>Aún no tenés entradas. Registrá cómo está tu piel hoy.</p></div>`;
+    return;
+  }
+  cont.innerHTML = state.historial.slice(0,7).map(e=>`
+    <div class="card" style="padding:14px 18px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:13px;font-weight:600">${e.fecha}</span>
+        <div style="display:flex;gap:6px">
+          ${e.piel?`<span class="badge badge-${e.piel==='muy bien'||e.piel==='bien'?'green':'amber'}">${e.piel}</span>`:''}
+          ${e.rutina?`<span class="badge badge-${e.rutina==='si'?'green':e.rutina==='parcial'?'amber':'red'}">${e.rutina==='si'?'Rutina completa':e.rutina==='parcial'?'Parcial':'Sin rutina'}</span>`:''}
+        </div>
+      </div>
+      ${e.sintomas&&e.sintomas.length?`<div style="font-size:12px;color:var(--text3);margin-bottom:6px">Síntomas: ${e.sintomas.join(', ')}</div>`:''}
+      ${e.notas?`<div style="font-size:13px;color:var(--text2)">${e.notas}</div>`:''}
+    </div>`).join('');
+}
+
+function mostrarTendencias(){
+  if(state.historial.length < 3) return;
+  const card = document.getElementById('card-tendencias');
+  card.style.display='block';
+  const recientes = state.historial.slice(0,7);
+  const conBuena = recientes.filter(e=>e.piel==='bien'||e.piel==='muy bien').length;
+  const conRutina = recientes.filter(e=>e.rutina==='si').length;
+  const pct = Math.round(conBuena/recientes.length*100);
+  const rutPct = Math.round(conRutina/recientes.length*100);
+  document.getElementById('tendencias-content').innerHTML=`
+    <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+        <span>Días con piel positiva</span><span style="font-weight:600;color:var(--accent)">${pct}%</span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+        <span>Adherencia a rutina</span><span style="font-weight:600;color:var(--accent)">${rutPct}%</span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar" style="width:${rutPct}%"></div></div>
+    </div>
+    <div style="font-size:13px;color:var(--text2);padding:10px;background:var(--bg2);border-radius:10px">
+      ${rutPct>=70?'La constancia en tu rutina se está notando. Seguí así.':rutPct>=40?'Tu adherencia es intermedia. Intentá ser más consistente para ver resultados.':'La constancia es clave. Incluso 2–3 pasos básicos diarios hacen diferencia.'}
+    </div>
+  `;
+}
+
+// ===================== HÁBITOS IA =====================
+let habitosGenerados = false;
+function generarHabitosPersonalizados(){
+  if(habitosGenerados || !state.piel) return;
+  generarHabitosIA();
+}
+
+async function generarHabitosIA(){
+  if(!state.piel){ alert('Completá tu perfil primero.'); return; }
+  const card = document.getElementById('card-habitos-ia');
+  const cont = document.getElementById('habitos-ia-content');
+  card.style.display='block';
+  cont.innerHTML=`<div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span>Generando recomendaciones personalizadas...</span></div>`;
+  document.getElementById('btn-habitos-ia').style.display='none';
+  habitosGenerados=true;
+  try{
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:700,
+        system:'Sos un experto en salud integral, nutrición y bienestar enfocado en cómo los hábitos impactan la salud de la piel y el cabello. Respondé en español rioplatense (Argentina), en tono cercano y práctico. Sé específico, no genérico.',
+        messages:[{role:'user',content:`Dame 4 recomendaciones de hábitos muy específicas y accionables para esta persona:
+Tipo de piel: ${state.piel}
+Problemas: ${state.problemas.join(', ')||'ninguno'}
+Edad: ${state.edad||'no especificada'}
+Problemas capilares: ${state.peloproblemas.join(', ')||'ninguno'}
+Preferencias: ${state.preferencias.join(', ')||'ninguna'}
+Hora levanta: ${state.horaLevanta||'no indicada'}
+Hora duerme: ${state.horaDuerme||'no indicada'}
+
+Enfocate en: alimentación, hidratación, sueño y otros hábitos que impacten directamente en su tipo de piel y problemas específicos.
+Formato: 4 párrafos cortos, directos, uno por recomendación. Sin asteriscos, sin numeración, solo texto plano.`}]
+      })
+    });
+    const data = await resp.json();
+    const text = data.content?.map(c=>c.text||'').join('') || '';
+    cont.innerHTML=`<div class="ai-response"><div class="ai-tag">Personalizadas para tu perfil</div>${text.split('\n').filter(l=>l.trim()).map(l=>`<p>${l}</p>`).join('')}</div>`;
+  } catch(e){
+    cont.innerHTML=`<p style="font-size:13px;color:var(--text3)">No se pudieron cargar las recomendaciones. Intentá de nuevo.</p>`;
+  }
+}
+
+// Init
+renderHistorial();
+</script>
+</body>
+</html>
